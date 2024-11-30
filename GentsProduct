@@ -1,0 +1,10 @@
+public class GentsProduct extends Product
+{
+    public GentsProduct(String name, String description, double price, int id) {
+        super(name, description, price, id);
+    }
+
+    public GentsProduct() {
+        super();
+    }
+}
