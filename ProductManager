@@ -1,0 +1,191 @@
+import java.io.*;
+
+public class ProductManager {
+    GentsProduct[] gentsProducts = new GentsProduct[100];
+    LadiesProduct[] ladiesProducts = new LadiesProduct[100];
+    int gentsCount = 0;
+    int ladiesCount = 0;
+
+    public ProductManager() {
+        initializeProducts();
+    }
+
+    public void addProduct(String name, String description, double price, int id, String type) {
+        if (type.equalsIgnoreCase("gents") || type.equalsIgnoreCase("g")) {
+            if (gentsCount < 100) {
+                gentsProducts[gentsCount++] = new GentsProduct(name, description, price, id);
+            } else {
+                System.out.println("\n\tCannot add more gents products. Storage full.");
+            }
+        } else if (type.equalsIgnoreCase("ladies") || type.equalsIgnoreCase("l")) {
+            if (ladiesCount < 100) {
+                ladiesProducts[ladiesCount++] = new LadiesProduct(name, description, price, id);
+            } else {
+                System.out.println("\n\tCannot add more ladies products. Storage full.");
+            }
+        }
+    }
+
+    public String displayProducts() {
+        StringBuilder result = new StringBuilder();
+        result.append("Gents Products:\n");
+        for (int i = 0; i < gentsCount; i++) {
+            result.append(gentsProducts[i].toString()).append("\n");
+        }
+        result.append("Ladies Products:\n");
+        for (int i = 0; i < ladiesCount; i++) {
+            result.append(ladiesProducts[i].toString()).append("\n");
+        }
+        return result.toString();
+    }
+
+    public String searchProducts(String criteria) {
+        StringBuilder result = new StringBuilder();
+        boolean found = false;
+        result.append("Search Results:\n");
+        for (int i = 0; i < gentsCount; i++) {
+            if (gentsProducts[i].getName().contains(criteria) ||
+                    gentsProducts[i].getDescription().contains(criteria) ||
+                    Integer.toString(gentsProducts[i].getId()).contains(criteria)) {
+                result.append(gentsProducts[i].toString()).append("\n");
+                found = true;
+            }
+        }
+        for (int i = 0; i < ladiesCount; i++) {
+            if (ladiesProducts[i].getName().contains(criteria) ||
+                    ladiesProducts[i].getDescription().contains(criteria) ||
+                    Integer.toString(ladiesProducts[i].getId()).contains(criteria)) {
+                result.append(ladiesProducts[i].toString()).append("\n");
+                found = true;
+            }
+        }
+        if (!found) {
+            result.append("\n\tNo matching products found.");
+        }
+        return result.toString();
+    }
+
+    public void deleteProduct(int id) {
+        for (int i = 0; i < gentsCount; i++) {
+            if (gentsProducts[i].getId() == id) {
+                for (int j = i; j < gentsCount - 1; j++) {
+                    gentsProducts[j] = gentsProducts[j + 1];
+                }
+                gentsCount--;
+                System.out.println("\n\tProduct with ID " + id + " deleted successfully.");
+                return;
+            }
+        }
+        for (int i = 0; i < ladiesCount; i++) {
+            if (ladiesProducts[i].getId() == id) {
+                for (int j = i; j < ladiesCount - 1; j++) {
+                    ladiesProducts[j] = ladiesProducts[j + 1];
+                }
+                ladiesCount--;
+                System.out.println("\n\tProduct with ID " + id + " deleted successfully.");
+                return;
+            }
+        }
+        System.out.println("\n\tProduct with ID " + id + " not found.");
+    }
+
+    public void editProduct(int id, String newName, String newDescription, double newPrice) {
+        for (int i = 0; i < gentsCount; i++) {
+            if (gentsProducts[i].getId() == id) {
+                gentsProducts[i].setName(newName);
+                gentsProducts[i].setDescription(newDescription);
+                gentsProducts[i].setPrice(newPrice);
+                System.out.println("\n\tProduct with ID " + id + " edited successfully.");
+                return;
+            }
+        }
+        for (int i = 0; i < ladiesCount; i++) {
+            if (ladiesProducts[i].getId() == id) {
+                ladiesProducts[i].setName(newName);
+                ladiesProducts[i].setDescription(newDescription);
+                ladiesProducts[i].setPrice(newPrice);
+                System.out.println("\n\tProduct with ID " + id + " edited successfully.");
+                return;
+            }
+        }
+        System.out.println("\n\tProduct with ID " + id + " not found.");
+    }
+
+    public void initializeProducts() {
+        String[] gentsNames = { "Gents Shirt", "Gents Pant", "Gents Jacket", "Gents Tie", "Gents Hat",
+                "Gents Shoes", "Gents Belt", "Gents Watch", "Gents Sunglasses", "Gents Socks" };
+        String[] gentsDescriptions = { "Stylish and comfortable shirt", "Formal pant", "Warm jacket", "Elegant tie",
+                "Fashionable hat",
+                "Durable shoes", "Leather belt", "Luxury watch", "Stylish sunglasses", "Comfortable socks" };
+        double[] gentsPrices = { 150.0, 200.0, 300.0, 50.0, 70.0, 250.0, 90.0, 400.0, 300.0, 40.0 };
+        int[] gentsIds = { 101, 102, 103, 104, 105, 106, 107, 108, 109, 110 };
+
+        String[] ladiesNames = { "Ladies Dress", "Ladies Skirt", "Ladies Blouse", "Ladies Scarf", "Ladies Hat",
+                "Ladies Shoes", "Ladies Bag", "Ladies Watch", "Ladies Sunglasses", "Ladies Jewelry" };
+        String[] ladiesDescriptions = { "Elegant dress", "Stylish skirt", "Comfortable blouse", "Fashionable scarf",
+                "Stylish hat",
+                "Durable shoes", "Fashionable bag", "Luxury watch", "Stylish sunglasses", "Beautiful jewelry" };
+        double[] ladiesPrices = { 250.0, 180.0, 120.0, 80.0, 100.0, 300.0, 200.0, 450.0, 320.0, 200.0 };
+        int[] ladiesIds = { 201, 202, 203, 204, 205, 206, 207, 208, 209, 210 };
+
+        for (int i = 0; i < 10; i++) {
+            addProduct(gentsNames[i], gentsDescriptions[i], gentsPrices[i], gentsIds[i], "gents");
+            addProduct(ladiesNames[i], ladiesDescriptions[i], ladiesPrices[i], ladiesIds[i], "ladies");
+        }
+    }
+
+    public void saveProductsToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("products.txt"))) {
+            // Write gents products
+            writer.write("Gents Products\n");
+            for (int i = 0; i < gentsCount; i++) {
+                writer.write(gentsProducts[i].getName() + "," +
+                        gentsProducts[i].getDescription() + "," +
+                        gentsProducts[i].getPrice() + "," +
+                        gentsProducts[i].getId() + "\n");
+            }
+
+            // Write ladies products
+            writer.write("Ladies Products\n");
+            for (int i = 0; i < ladiesCount; i++) {
+                writer.write(ladiesProducts[i].getName() + "," +
+                        ladiesProducts[i].getDescription() + "," +
+                        ladiesProducts[i].getPrice() + "," +
+                        ladiesProducts[i].getId() + "\n");
+            }
+
+            System.out.println("Products saved to products.txt successfully.");
+        } catch (IOException e) {
+            System.out.println("Error saving products: " + e.getMessage());
+        }
+    }
+
+    public void loadProductsFromFile() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("products.txt"))) {
+            String line;
+            String type = "";
+
+            while ((line = reader.readLine()) != null) {
+                if (line.equals("Gents Products")) {
+                    type = "gents";
+                    continue;
+                } else if (line.equals("Ladies Products")) {
+                    type = "ladies";
+                    continue;
+                }
+
+                String[] parts = line.split(",");
+                if (parts.length == 4) {
+                    String name = parts[0];
+                    String description = parts[1];
+                    double price = Double.parseDouble(parts[2]);
+                    int id = Integer.parseInt(parts[3]);
+                    addProduct(name, description, price, id, type);
+                }
+            }
+            System.out.println("Products loaded from products.txt successfully.");
+        } catch (IOException e) {
+            System.out.println("Error loading products: " + e.getMessage());
+        }
+    }
+}
