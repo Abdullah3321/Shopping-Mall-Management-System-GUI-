@@ -1,0 +1,227 @@
+import javax.swing.*;
+import java.awt.*;
+
+public class ShoppingMallMain {
+    private JFrame frame;
+    private JTextArea outputArea;
+    private ProductManager productManager = new ProductManager();
+    private Validation validation = new Validation();
+
+    public ShoppingMallMain() {
+        initialize();
+    }
+
+    private void initialize() {
+        frame = new JFrame();
+        frame.setTitle("Shopping Mall Management System");
+        frame.setBounds(100, 100, 800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().setLayout(new BorderLayout(0, 0));
+
+        // Align buttons vertically and center them
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // Spacing between buttons
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        gbc.anchor = GridBagConstraints.CENTER; // Center the buttons vertically
+
+        frame.getContentPane().add(buttonPanel, BorderLayout.CENTER);
+
+        JButton btnDisplay = new JButton("Display Products");
+        buttonPanel.add(btnDisplay, gbc);
+        btnDisplay.addActionListener(e -> displayProducts());
+
+        JButton btnAdd = new JButton("Add Product");
+        buttonPanel.add(btnAdd, gbc);
+        btnAdd.addActionListener(e -> addProduct());
+
+        JButton btnSearch = new JButton("Search Product");
+        buttonPanel.add(btnSearch, gbc);
+        btnSearch.addActionListener(e -> searchProduct());
+
+        JButton btnDelete = new JButton("Delete Product");
+        buttonPanel.add(btnDelete, gbc);
+        btnDelete.addActionListener(e -> deleteProduct());
+
+        JButton btnEdit = new JButton("Edit Product");
+        buttonPanel.add(btnEdit, gbc);
+        btnEdit.addActionListener(e -> editProduct());
+
+        JButton btnSave = new JButton("Save Products");
+        buttonPanel.add(btnSave, gbc);
+        btnSave.addActionListener(e -> saveProducts());
+
+        JButton btnLoad = new JButton("Load Products");
+        buttonPanel.add(btnLoad, gbc);
+        btnLoad.addActionListener(e -> loadProducts());
+
+        outputArea = new JTextArea(20, 50); // Specify rows and columns for better initial size
+        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        frame.getContentPane().add(scrollPane, BorderLayout.SOUTH);
+
+        frame.setLocationRelativeTo(null); // Center the window
+        frame.setVisible(true);
+    }
+
+    private void displayProducts() {
+        outputArea.setText(productManager.displayProducts());
+    }
+
+    private void addProduct() {
+        String name = JOptionPane.showInputDialog("Enter product name:");
+        if (name == null)
+            return;
+        if (!validation.isValidString(name)) {
+            JOptionPane.showMessageDialog(frame, "Invalid product name.");
+            return;
+        }
+
+        String description = JOptionPane.showInputDialog("Enter product description:");
+        if (description == null)
+            return;
+        if (!validation.isValidString(description)) {
+            JOptionPane.showMessageDialog(frame, "Invalid product description.");
+            return;
+        }
+
+        String priceStr = JOptionPane.showInputDialog("Enter product price:");
+        if (priceStr == null)
+            return;
+        double price;
+        try {
+            if (!validation.isValidPrice(priceStr))
+                throw new Exception();
+            price = Double.parseDouble(priceStr);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Invalid product price.");
+            return;
+        }
+
+        String idStr = JOptionPane.showInputDialog("Enter product ID:");
+        if (idStr == null)
+            return;
+        int id;
+        try {
+            if (!validation.isValidId(idStr))
+                throw new Exception();
+            id = Integer.parseInt(idStr);
+            if (!isUniqueId(id))
+                throw new Exception();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Invalid or duplicate product ID.");
+            return;
+        }
+
+        String type = JOptionPane.showInputDialog("Enter product type (gents/ladies):");
+        if (type == null)
+            return;
+        if (!type.equalsIgnoreCase("gents") && !type.equalsIgnoreCase("ladies")) {
+            JOptionPane.showMessageDialog(frame, "Invalid product type.");
+            return;
+        }
+
+        productManager.addProduct(name, description, price, id, type);
+        JOptionPane.showMessageDialog(frame, "Product added successfully!");
+    }
+
+    private void searchProduct() {
+        String criteria = JOptionPane.showInputDialog("Enter search criteria:");
+        if (criteria != null) {
+            outputArea.setText(productManager.searchProducts(criteria));
+        }
+    }
+
+    private void deleteProduct() {
+        String idStr = JOptionPane.showInputDialog("Enter product ID to delete:");
+        if (idStr == null)
+            return;
+        int id;
+        try {
+            if (!validation.isValidId(idStr))
+                throw new Exception();
+            id = Integer.parseInt(idStr);
+            productManager.deleteProduct(id);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Invalid product ID.");
+            return;
+        }
+        JOptionPane.showMessageDialog(frame, "Product deleted successfully!");
+    }
+
+    private void editProduct() {
+        String idStr = JOptionPane.showInputDialog("Enter product ID to edit:");
+        if (idStr == null)
+            return;
+        int id;
+        try {
+            if (!validation.isValidId(idStr))
+                throw new Exception();
+            id = Integer.parseInt(idStr);
+            if (isUniqueId(id))
+                throw new Exception();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Invalid or non-existent product ID.");
+            return;
+        }
+
+        String newName = JOptionPane.showInputDialog("Enter new product name:");
+        if (newName == null)
+            return;
+        if (!validation.isValidString(newName)) {
+            JOptionPane.showMessageDialog(frame, "Invalid product name.");
+            return;
+        }
+
+        String newDescription = JOptionPane.showInputDialog("Enter new product description:");
+        if (newDescription == null)
+            return;
+        if (!validation.isValidString(newDescription)) {
+            JOptionPane.showMessageDialog(frame, "Invalid product description.");
+            return;
+        }
+
+        String newPriceStr = JOptionPane.showInputDialog("Enter new product price:");
+        if (newPriceStr == null)
+            return;
+        double newPrice;
+        try {
+            if (!validation.isValidPrice(newPriceStr))
+                throw new Exception();
+            newPrice = Double.parseDouble(newPriceStr);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Invalid product price.");
+            return;
+        }
+
+        productManager.editProduct(id, newName, newDescription, newPrice);
+        JOptionPane.showMessageDialog(frame, "Product edited successfully!");
+    }
+
+    private void saveProducts() {
+        productManager.saveProductsToFile();
+        JOptionPane.showMessageDialog(frame, "Products saved to file.");
+    }
+
+    private void loadProducts() {
+        productManager.loadProductsFromFile();
+        JOptionPane.showMessageDialog(frame, "Products loaded from file.");
+    }
+
+    private boolean isUniqueId(int id) {
+        for (int i = 0; i < productManager.gentsCount; i++) {
+            if (productManager.gentsProducts[i].getId() == id) {
+                return false;
+            }
+        }
+        for (int i = 0; i < productManager.ladiesCount; i++) {
+            if (productManager.ladiesProducts[i].getId() == id) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
