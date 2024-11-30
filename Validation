@@ -1,0 +1,24 @@
+public class Validation
+{
+    public boolean isValidString(String s) {
+        return !s.trim().isEmpty();
+    }
+
+    public boolean isValidPrice(String priceStr) {
+        try {
+            Double.parseDouble(priceStr);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public boolean isValidId(String idStr) {
+        try {
+            Integer.parseInt(idStr);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+}
